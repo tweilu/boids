@@ -69,6 +69,7 @@ endif
 
 OBJECTS := \
 	$(OBJDIR)/main.o \
+	$(OBJDIR)/Boid.o \
 
 RESOURCES := \
 
@@ -130,6 +131,9 @@ $(GCH): $(PCH)
 endif
 
 $(OBJDIR)/main.o: src/main.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+$(OBJDIR)/Boid.o: src/Boid.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
