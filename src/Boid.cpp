@@ -30,10 +30,10 @@ void Boid::setVelocity(Vector3f velocity)
 
 void Boid::draw()
 {
-    // draw the boid based on position
+    // draw based on position
     glPushMatrix();
     glTranslatef(mPosition.x(), mPosition.y(), mPosition.z());
-    //orient the boid based on velocity vector
+    //orient based on velocity vector
     float magnitude = mVelocity.abs();
     if (magnitude > 0.0)
     {
@@ -42,6 +42,6 @@ void Boid::draw()
         float zNorm = mVelocity.z() / magnitude;
         glRotatef(acos(oldX * xNorm + oldY * yNorm + oldZ * zNorm) * 57.2957795, oldY * zNorm - oldZ * yNorm, oldZ * xNorm - oldX * zNorm, oldX * yNorm - oldY * xNorm);
     }
-    glutWireCone(0.5, 1.0, 50, 50);
+    glutWireCone(0.25, 0.5, 50, 50);
     glPopMatrix();
 }

@@ -8,16 +8,33 @@
 #include "camera.h"
 #include "vecmath.h"
 #include "Boid.h"
+#include "Rules.h"
 
 using namespace std;
 
 // Globals here.
 namespace
 {
+  Rules* rules;
 
   void initSystem(int argc, char * argv[])
   {
-    
+    rules = new Rules;
+    for(int i=0; i < 15; i++)
+    {
+        Vector3f p = Vector3f(rand() % (MAX_X * 2) - MAX_X, rand() % (MAX_Y * 2) - MAX_Y, rand() % (MAX_Z * 2) - MAX_Z);
+        Vector3f v = Vector3f(((float)rand() / RAND_MAX) - 0.5, ((float)rand() / RAND_MAX) - 0.5, ((float)rand() / RAND_MAX) - 0.5);
+        rules->boids.push_back(new Boid(p, v.normalized()));
+    }
+    rules->N = rules->boids.size();
+  }
+
+  void stepSystem()
+  {
+    for(int i=0; i < rules->N; i++)
+    {
+        rules->update_boids();
+    }
   }
 
   // Draw the current particle positions
@@ -33,7 +50,10 @@ namespace
     glutSolidSphere(0.1f,10.0f,10.0f);
 
     // CALL DRAW STUFF HERE
-    
+    for(int i=0; i < rules->N; i++)
+    {
+        rules->boids.at(i)->draw();
+    }
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
     glPushMatrix();
@@ -145,7 +165,7 @@ namespace
         // Set up a perspective view, with square aspect ratio
         glMatrixMode(GL_PROJECTION);
 
-        camera.SetPerspective(50);
+        camera.SetPerspective(100);
         glLoadMatrixf( camera.projectionMatrix() );
     }
 
@@ -229,7 +249,7 @@ namespace
 
     void timerFunc(int t)
     {
-        //stepSystem(); CALL SYSTEM STEP HERE
+        stepSystem(); //CALL SYSTEM STEP HERE
 
         glutPostRedisplay();
 
@@ -280,7 +300,7 @@ int main( int argc, char* argv[] )
     glutDisplayFunc( drawScene );
 
     // Trigger timerFunc every 20 msec
-    glutTimerFunc(20, timerFunc, 20);
+    glutTimerFunc(2000, timerFunc, 2000);
 
         
     // Start the main loop.  glutMainLoop never returns.

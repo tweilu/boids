@@ -45,18 +45,45 @@ Vector3f Rules::match_velocity(Boid* b)
     return (pv-b->getVelocity())/8;
 }
 
+Vector3f Rules::bound_position(Boid* b)
+{
+    float x, y, z;
+    Vector3f pos = b->getPosition();
+    if(pos.x() < MIN_X)
+    {
+        x = 10;
+    } else if(pos.x() > MAX_X)
+    {
+        x = -10;
+    }
+    if(pos.y() < MIN_Y)
+    {
+        y = 10;
+    } else if(pos.y() > MAX_Y)
+    {
+        y = -10;
+    }
+    if(pos.z() < MIN_Z)
+    {
+        z = 10;
+    } else if(pos.z() > MAX_Z)
+    {
+        z = -10;
+    }
+    return Vector3f(x,y,z);
+}
+
 // Applies all rules to all boids
 void Rules::update_boids()
 {
-    Vector3f v1;
-    Vector3f v2;
-    Vector3f v3;
+    Vector3f v1, v2, v3, v4;
     for(unsigned i=0; i<N; i++)
     {
         Boid* b = boids.at(i);
         v1 = center_of_mass(b);
         v2 = keep_distance(b);
         v3 = match_velocity(b);
+        v4 = bound_position(b);
 
         Vector3f oldV = b->getVelocity();
         Vector3f oldP = b->getPosition();
