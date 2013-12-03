@@ -71,6 +71,7 @@ OBJECTS := \
 	$(OBJDIR)/main.o \
 	$(OBJDIR)/Boid.o \
 	$(OBJDIR)/camera.o \
+	$(OBJDIR)/Rules.o \
 
 RESOURCES := \
 
@@ -138,6 +139,9 @@ $(OBJDIR)/Boid.o: src/Boid.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 $(OBJDIR)/camera.o: src/camera.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+$(OBJDIR)/Rules.o: src/Rules.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 

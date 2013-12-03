@@ -1,30 +1,47 @@
 #include "Boid.h"
+#include "extra.h"
 
 Boid::Boid(Vector3f position, Vector3f velocity)
 {
-	mPosition = position;
-	mVelocity = velocity;
+    mPosition = position;
+    mVelocity = velocity;
+    oldX = 0.0;
+    oldY = 0.0;
+    oldZ = 1.0;
 }
 
 Vector3f Boid::getPosition()
 {
-	return mPosition;
+    return mPosition;
 }
 Vector3f Boid::getVelocity()
 {
-	return mVelocity;
+    return mVelocity;
 }
 
 void Boid::setPosition(Vector3f position)
 {
-	mPosition = position;
+    mPosition = position;
 }
 void Boid::setVelocity(Vector3f velocity)
 {
-	mVelocity = velocity;
+    mVelocity = velocity;
 }
 
-void draw()
+void Boid::draw()
 {
-	// draw the boid based on position
+    // draw the boid based on position
+    glPushMatrix();
+    glTranslatef(mPosition.x(), mPosition.y(), mPosition.z());
+    //orient the boid based on velocity vector
+    float magnitude = mVelocity.abs();
+    if (magnitude > 0.0)
+    {
+        float xNorm = mVelocity.x() / magnitude;
+        float yNorm = mVelocity.y() / magnitude;
+        float zNorm = mVelocity.z() / magnitude;
+        glRotatef(acos(oldX * xNorm + oldY * yNorm + oldZ * zNorm) * 57.2957795, oldY * zNorm - oldZ * yNorm, oldZ * xNorm - oldX * zNorm, oldX * yNorm - oldY * xNorm);
+    }
+    glutWireCone(0.5, 1.0, 50, 50);
+    glPopMatrix();
 }

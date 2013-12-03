@@ -1,5 +1,5 @@
-#ifndef CLOTHSYSTEM_H
-#define CLOTHSYSTEM_H
+#ifndef BOID_H
+#define BOID_H
 
 #include "vecmath.h"
 #include <vector>
@@ -21,6 +21,7 @@ public:
 private:
 	Vector3f mPosition;
 	Vector3f mVelocity;
+	float oldX, oldY, oldZ;
 };
 
 
