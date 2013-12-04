@@ -49,28 +49,43 @@ Vector3f Rules::bound_position(Boid* b)
 {
     float x, y, z;
     Vector3f pos = b->getPosition();
+    float val = 2;
+
     if(pos.x() < MIN_X)
     {
-        x = 5;
+        x = val;
     } else if(pos.x() > MAX_X)
     {
-        x = -5;
+        x = -val;
     }
+
     if(pos.y() < MIN_Y)
     {
-        y = 5;
+        y = val;
     } else if(pos.y() > MAX_Y)
     {
-        y = -5;
+        y = -val;
     }
+
     if(pos.z() < MIN_Z)
     {
-        z = 5;
+        z = val;
     } else if(pos.z() > MAX_Z)
     {
-        z = -5;
+        z = -val;
     }
     return Vector3f(x,y,z);
+}
+
+void Rules::limit_velocity(Boid* b)
+{
+    int vlim = 10;
+    Vector3f vel = b->getVelocity();
+    float speed = vel.abs();
+    if(speed > vlim)
+    {
+        b->setVelocity(vel/speed*vlim);
+    }
 }
 
 // Applies all rules to all boids
@@ -87,7 +102,8 @@ void Rules::update_boids()
 
         Vector3f oldV = b->getVelocity();
         Vector3f oldP = b->getPosition();
-        b->setVelocity(oldV + v1 + v2 + v3);
+        b->setVelocity(oldV + v1 + v2 + v3 + v4);
+        limit_velocity(b);
         b->setPosition(oldP + b->getVelocity());
     }
 }

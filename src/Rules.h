@@ -5,12 +5,12 @@
 #include <vector>
 #include "Boid.h"
 
-#define MAX_X 5
-#define MIN_X -5
-#define MAX_Y 5
-#define MIN_Y -5
-#define MAX_Z 5
-#define MIN_Z -5
+#define MAX_X 30
+#define MIN_X -30
+#define MAX_Y 30
+#define MIN_Y -30
+#define MAX_Z 30
+#define MIN_Z -30
 
 struct Rules
 {
@@ -30,6 +30,8 @@ struct Rules
 	Vector3f match_velocity(Boid* b);
 
 	Vector3f bound_position(Boid* b);
+
+	void limit_velocity(Boid* b);
 
 	void update_boids();
 };

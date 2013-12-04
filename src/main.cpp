@@ -32,12 +32,19 @@ namespace
   void stepSystem()
   {
     rules->update_boids();
-    cout << "Start Boids" << endl;
+    /*cout << "Start" << endl;
+    cout << "Start Position" << endl;
+    for(int i=0; i < 10; i++)
+    {
+        Boid* b = rules->boids.at(i);
+        cout << b->getPosition().x() << "," << b->getPosition().y() << "," << b->getPosition().z() << endl;
+    }
+    cout << "Start Velocity" << endl;
     for(int i=0; i < 10; i++)
     {
         Boid* b = rules->boids.at(i);
         cout << b->getVelocity().x() << "," << b->getVelocity().y() << "," << b->getVelocity().z() << endl;
-    }
+    }*/
   }
 
   // Draw the current particle positions
@@ -302,7 +309,7 @@ int main( int argc, char* argv[] )
     glutDisplayFunc( drawScene );
 
     // Trigger timerFunc every 20 msec
-    glutTimerFunc(200, timerFunc, 200);
+    glutTimerFunc(100, timerFunc, 100);
 
         
     // Start the main loop.  glutMainLoop never returns.
