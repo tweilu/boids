@@ -3,6 +3,8 @@
 #include <ctime>
 #include <iostream>
 #include <vector>
+#include <ctime>
+#include <math.h>
 
 #include "extra.h"
 #include "camera.h"
@@ -14,40 +16,7 @@ using namespace std;
 // Globals here.
 namespace
 {
-    vector<Boid*> boids;
-    int N = boids.size();
-
-  void initSystem(int argc, char * argv[])
-  {
-    
-  }
-
-  // Draw the current particle positions
-  void drawSystem()
-  {
-    
-    // Base material colors (they don't change)
-    GLfloat particleColor[] = {0.4f, 0.7f, 1.0f, 1.0f};
-    GLfloat floorColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, particleColor);
-    
-    glutSolidSphere(0.1f,10.0f,10.0f);
-
-    // CALL DRAW STUFF HERE    
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
-    glPushMatrix();
-    glTranslatef(0.0f,-5.0f,0.0f);
-    glScaled(50.0f,0.01f,50.0f);
-    glutSolidCube(1);
-    glPopMatrix();
-    
-  }
-    //-------------------------------------------------------------------
-    
-        
-    // This is the camera
+        // This is the camera
     Camera camera;
 
     // These are state variables for the UI
@@ -62,6 +31,135 @@ namespace
     void reshapeFunc(int w, int h);
     void drawScene(void);
     void initRendering();
+
+    vector<Boid*> boids;
+    int N = boids.size();
+
+    void add_boid(Boid *boid) {
+        boids.push_back(boid);
+        N = boids.size();
+    }
+
+    Vector3f randPosVec3f() {
+        return Vector3f((rand()%100)-50, (rand()%100)-50, (rand()%100)-50);
+    }
+
+    Vector3f randVelVec3f() {
+        return Vector3f((rand()%3)-1, (rand()%3)-1, (rand()%3)-1);
+    }
+
+    // Boids try to fly towards the centre of mass of neighbouring boids.
+    // returns position offset for given boid as a result of rule
+    Vector3f center_of_mass(Boid* b)
+    {
+        Vector3f pc = -1*b->getPosition();
+        for(unsigned i=0; i<N; i++)
+        {
+            pc = pc + boids.at(i)->getPosition();
+        }
+        pc = pc/(N-1);
+        return (pc - b->getPosition());
+    }
+
+    // Boids try to keep a small distance away from other objects (including other boids).
+    // returns position offset for given boid as a result of rule
+    Vector3f keep_distance(Boid* b)
+    {
+        Vector3f c = Vector3f::ZERO;
+        Vector3f pos = b->getPosition();
+        for(unsigned i=0; i<N; i++)
+        {
+            Vector3f disp = pos - boids.at(i)->getPosition();
+            if (disp.abs() < 10 && disp.abs() != 0)
+            {
+                c += (1.0/disp.abs())*disp;
+            }
+        }
+        return c;
+    }
+
+    // Boids try to match velocity with near boids.
+    // returns position offset for given boid as a result of rule
+    Vector3f match_velocity(Boid* b)
+    {
+        Vector3f pv = -1*b->getVelocity();
+        for(unsigned i=0; i<N; i++)
+        {
+            pv = pv + boids.at(i)->getVelocity();
+        }
+        pv = pv/(N-1);
+        return (pv-b->getVelocity());
+    }
+
+    // Applies all rules to all boids
+    void updateBoids()
+    {
+        Vector3f v1;
+        Vector3f v2;
+        Vector3f v3;
+        for(unsigned i=1; i<N; i++)
+        {
+            Boid* b = boids.at(i);
+            v1 = .01*center_of_mass(b);
+            v2 = .01*keep_distance(b);
+            v3 = .01*match_velocity(b);
+
+            Vector3f oldV = b->getVelocity();
+            Vector3f oldP = b->getPosition();
+            b->setVelocity(oldV + v1 + v2 + v3);
+            b->setPosition(oldP + b->getVelocity());
+            if (i == 1) {
+                camera.SetCenter(b->getPosition());
+                Vector3f dir = b->getVelocity().normalized();
+                Matrix4f rotate;
+                rotate[0] = dir[0]; rotate[5] = dir[1]; rotate[10] = dir[2]; rotate[11] = 1;
+                camera.SetRotation(rotate);
+            }
+        }
+    }
+
+    void initSystem(int argc, char * argv[])
+    {
+        Boid *center = new Boid(Vector3f(0,0,0), Vector3f(0,0,0));
+        add_boid(center);
+        for (unsigned i = 0; i < 100; i++ ) 
+        {
+            Boid *b = new Boid(randPosVec3f(), randVelVec3f());   
+            add_boid(b);
+        }
+    }
+
+  // Draw the current particle positions
+  void drawSystem()
+  {
+    
+    // Base material colors (they don't change)
+    GLfloat particleColor[] = {0.4f, 0.7f, 1.0f, 1.0f};
+    GLfloat floorColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, particleColor);
+    
+    glutSolidSphere(0.1f,10.0f,10.0f);
+
+    // CALL DRAW STUFF HERE   
+
+
+
+    for (unsigned i = 0; i < boids.size(); i++)
+    {
+        boids[i]->draw(i);
+    }
+    
+    // glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
+    // glPushMatrix();
+    // glTranslatef(0.0f,-5.0f,0.0f);
+    // glScaled(50.0f,0.01f,50.0f);
+    // glutSolidCube(1);
+    // glPopMatrix();
+    
+  }
+    //-------------------------------------------------------------------
+
 
     // This function is called whenever a "Normal" key press is
     // received.
@@ -78,6 +176,15 @@ namespace
             camera.SetRotation( eye );
             camera.SetCenter( Vector3f::ZERO );
             break;
+        }
+        case 's':
+        {
+            updateBoids();
+            for (unsigned i = 0; i < N; i++) {
+                Vector3f pos = boids[i]->getPosition();
+                Vector3f vel = boids[i]->getVelocity();
+                cout << "boid" << i <<": pos: [" << pos[0] << " " << pos[1] << " " << pos[2] << "] vel: [" << vel[0] << " " << vel[1] << " " << vel[2] << "]" << endl;
+            }
         }
         default:
             cout << "Unhandled key press " << key << "." << endl;        
@@ -239,73 +346,12 @@ namespace
 
 }
 
-// Boids try to fly towards the centre of mass of neighbouring boids.
-// returns position offset for given boid as a result of rule
-Vector3f center_of_mass(Boid* b)
-{
-    Vector3f pc = -1*b->getPosition();
-    for(unsigned i=0; i<N; i++)
-    {
-        pc = pc + boids.at(i)->getPosition();
-    }
-    pc = pc/(N-1);
-    return (pc - b->getPosition())/100;
-}
-
-// Boids try to keep a small distance away from other objects (including other boids).
-// returns position offset for given boid as a result of rule
-Vector3f keep_distance(Boid* b)
-{
-    Vector3f c = Vector3f::ZERO;
-    for(unsigned i=0; i<N; i++)
-    {
-        Vector3f disp = b->getPosition() - boids.at(i)->getPosition();
-        if (disp.abs() < 100)
-        {
-            c = c - disp;
-        }
-    }
-    return c;
-}
-
-// Boids try to match velocity with near boids.
-// returns position offset for given boid as a result of rule
-Vector3f match_velocity(Boid* b)
-{
-    Vector3f pv = -1*b->getVelocity();
-    for(unsigned i=0; i<N; i++)
-    {
-        pv = pv + boids.at(i)->getVelocity();
-    }
-    pv = pv/(N-1);
-    return (pv-b->getVelocity())/8;
-}
-
-// Applies all rules to all boids
-void updateBoids()
-{
-    Vector3f v1;
-    Vector3f v2;
-    Vector3f v3;
-    for(unsigned i=0; i<N; i++)
-    {
-        Boid* b = boids.at(i);
-        v1 = center_of_mass(b);
-        v2 = keep_distance(b);
-        v3 = match_velocity(b);
-
-        Vector3f oldV = b->getVelocity();
-        Vector3f oldP = b->getPosition();
-        b->setVelocity(oldV + v1 + v2 + v3);
-        b->setPosition(oldP + b->getVelocity());
-    }
-}
-
 // Main routine.
 // Set up OpenGL, define the callbacks and start the main loop
 int main( int argc, char* argv[] )
 {
-    cout << "Hello World";
+    srand(time(0));
+    cout << "Hello World" << endl;;
     glutInit( &argc, argv );
 
     // We're going to animate it, so double buffer 

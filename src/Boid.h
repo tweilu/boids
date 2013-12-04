@@ -1,5 +1,11 @@
-#ifndef CLOTHSYSTEM_H
-#define CLOTHSYSTEM_H
+#ifndef BOID_H
+#define BOID_H
+
+#ifdef __APPLE__
+# include <GLUT/glut.h>
+#else
+# include <GL/glut.h>
+#endif
 
 #include "vecmath.h"
 #include <vector>
@@ -10,7 +16,7 @@ class Boid
 public:
 	Boid(Vector3f position, Vector3f velocity);
 	
-	void draw();
+	void draw(int i);
 
 	Vector3f getPosition();
 	Vector3f getVelocity();
