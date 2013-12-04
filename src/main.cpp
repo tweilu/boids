@@ -29,23 +29,7 @@ namespace
     rules->N = rules->boids.size();
   }
 
-  void stepSystem()
-  {
-    rules->update_boids();
-    /*cout << "Start" << endl;
-    cout << "Start Position" << endl;
-    for(int i=0; i < 10; i++)
-    {
-        Boid* b = rules->boids.at(i);
-        cout << b->getPosition().x() << "," << b->getPosition().y() << "," << b->getPosition().z() << endl;
-    }
-    cout << "Start Velocity" << endl;
-    for(int i=0; i < 10; i++)
-    {
-        Boid* b = rules->boids.at(i);
-        cout << b->getVelocity().x() << "," << b->getVelocity().y() << "," << b->getVelocity().z() << endl;
-    }*/
-  }
+  
 
   // Draw the current particle positions
   void drawSystem()
@@ -62,7 +46,10 @@ namespace
     // CALL DRAW STUFF HERE
     for(int i=0; i < rules->N; i++)
     {
-        rules->boids.at(i)->draw();
+        if(i!=0)
+        {
+            rules->boids.at(i)->draw();
+        }
     }
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
@@ -78,6 +65,47 @@ namespace
         
     // This is the camera
     Camera camera;
+
+    bool birdseye = false;
+
+void stepSystem()
+  {
+    rules->update_boids();
+    if (birdseye)
+    {
+        Boid* b = rules->boids.at(0); // attach camera to the first boid
+        camera.SetCenter(b->getPosition());
+        Vector3f dir = b->getVelocity().normalized();
+        Matrix4f rotate;
+        rotate[0] = dir[0]; rotate[5] = dir[1]; rotate[10] = dir[2]; rotate[11] = 1;
+        camera.SetRotation(rotate);
+    }
+    
+    /*cout << "Start" << endl;
+    cout << "Start Position" << endl;
+    for(int i=0; i < 10; i++)
+    {
+        Boid* b = rules->boids.at(i);
+        cout << b->getPosition().x() << "," << b->getPosition().y() << "," << b->getPosition().z() << endl;
+    }
+    cout << "Start Velocity" << endl;
+    for(int i=0; i < 10; i++)
+    {
+        Boid* b = rules->boids.at(i);
+        cout << b->getVelocity().x() << "," << b->getVelocity().y() << "," << b->getVelocity().z() << endl;
+    }*/
+  }
+
+  void toggleBirdseye()
+  {
+    birdseye = !birdseye;
+    if (!birdseye)
+    {
+        Matrix4f eye = Matrix4f::identity();
+        camera.SetRotation( eye );
+        camera.SetCenter( Vector3f::ZERO );
+    }
+  }
 
     // These are state variables for the UI
     bool g_mousePressed = false;
@@ -106,6 +134,11 @@ namespace
             Matrix4f eye = Matrix4f::identity();
             camera.SetRotation( eye );
             camera.SetCenter( Vector3f::ZERO );
+            break;
+        }
+        case 'b':
+        {
+            toggleBirdseye();
             break;
         }
         default:
