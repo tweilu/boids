@@ -7,7 +7,7 @@ using namespace std;
 // returns position offset for given boid as a result of rule
 Vector3f Rules::center_of_mass(Boid* b)
 {
-    Vector3f pc = -1*b->getPosition();
+    Vector3f pc = -b->getPosition();
     for(unsigned i=0; i<N; i++)
     {
         pc = pc + boids.at(i)->getPosition();
@@ -24,7 +24,7 @@ Vector3f Rules::keep_distance(Boid* b)
     for(unsigned i=0; i<N; i++)
     {
         Vector3f disp = b->getPosition() - boids.at(i)->getPosition();
-        if (disp.abs() < 100)
+        if (disp.abs() < 5)
         {
             c = c - disp;
         }
@@ -36,7 +36,7 @@ Vector3f Rules::keep_distance(Boid* b)
 // returns position offset for given boid as a result of rule
 Vector3f Rules::match_velocity(Boid* b)
 {
-    Vector3f pv = -1*b->getVelocity();
+    Vector3f pv = -b->getVelocity();
     for(unsigned i=0; i<N; i++)
     {
         pv = pv + boids.at(i)->getVelocity();
@@ -51,24 +51,24 @@ Vector3f Rules::bound_position(Boid* b)
     Vector3f pos = b->getPosition();
     if(pos.x() < MIN_X)
     {
-        x = 10;
+        x = 5;
     } else if(pos.x() > MAX_X)
     {
-        x = -10;
+        x = -5;
     }
     if(pos.y() < MIN_Y)
     {
-        y = 10;
+        y = 5;
     } else if(pos.y() > MAX_Y)
     {
-        y = -10;
+        y = -5;
     }
     if(pos.z() < MIN_Z)
     {
-        z = 10;
+        z = 5;
     } else if(pos.z() > MAX_Z)
     {
-        z = -10;
+        z = -5;
     }
     return Vector3f(x,y,z);
 }

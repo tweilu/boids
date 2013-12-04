@@ -20,10 +20,10 @@ namespace
   void initSystem(int argc, char * argv[])
   {
     rules = new Rules;
-    for(int i=0; i < 15; i++)
+    for(int i=0; i < 10; i++)
     {
         Vector3f p = Vector3f(rand() % (MAX_X * 2) - MAX_X, rand() % (MAX_Y * 2) - MAX_Y, rand() % (MAX_Z * 2) - MAX_Z);
-        Vector3f v = Vector3f(((float)rand() / RAND_MAX) - 0.5, ((float)rand() / RAND_MAX) - 0.5, ((float)rand() / RAND_MAX) - 0.5);
+        Vector3f v = Vector3f(((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX));
         rules->boids.push_back(new Boid(p, v.normalized()));
     }
     rules->N = rules->boids.size();
@@ -31,16 +31,19 @@ namespace
 
   void stepSystem()
   {
-    for(int i=0; i < rules->N; i++)
+    rules->update_boids();
+    cout << "Start Boids" << endl;
+    for(int i=0; i < 10; i++)
     {
-        rules->update_boids();
+        Boid* b = rules->boids.at(i);
+        cout << b->getVelocity().x() << "," << b->getVelocity().y() << "," << b->getVelocity().z() << endl;
     }
   }
 
   // Draw the current particle positions
   void drawSystem()
   {
-    
+
     // Base material colors (they don't change)
     GLfloat particleColor[] = {0.4f, 0.7f, 1.0f, 1.0f};
     GLfloat floorColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
@@ -165,7 +168,7 @@ namespace
         // Set up a perspective view, with square aspect ratio
         glMatrixMode(GL_PROJECTION);
 
-        camera.SetPerspective(100);
+        camera.SetPerspective(50);
         glLoadMatrixf( camera.projectionMatrix() );
     }
 
@@ -262,7 +265,6 @@ namespace
 // Set up OpenGL, define the callbacks and start the main loop
 int main( int argc, char* argv[] )
 {
-    cout << "Hello World";
     glutInit( &argc, argv );
 
     // We're going to animate it, so double buffer 
@@ -274,7 +276,7 @@ int main( int argc, char* argv[] )
     
     camera.SetDimensions( 600, 600 );
 
-    camera.SetDistance( 10 );
+    camera.SetDistance( 100 );
     camera.SetCenter( Vector3f::ZERO );
     
     glutCreateWindow("Boids");
@@ -300,7 +302,7 @@ int main( int argc, char* argv[] )
     glutDisplayFunc( drawScene );
 
     // Trigger timerFunc every 20 msec
-    glutTimerFunc(2000, timerFunc, 2000);
+    glutTimerFunc(200, timerFunc, 200);
 
         
     // Start the main loop.  glutMainLoop never returns.
