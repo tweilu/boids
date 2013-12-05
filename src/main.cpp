@@ -19,7 +19,7 @@ namespace
     Rules* rules;
     Camera camera;
     float CAMERA_DISTANCE = 60;
-    int NUM_BOIDS = 50;
+    int NUM_BOIDS = 150;
     bool birdseye = false;
 
     Vector3f randPosVec3f() {

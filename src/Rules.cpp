@@ -162,7 +162,7 @@ void Rules::update_boids()
 {
     float wc = 0.01; // weight for center of mass
     float wk = 0.5; // weight for keep distance
-    float wm = 0.25; // weight for match velocity
+    float wm = 0.2; // weight for match velocity
     float wa = 0.5; // weight for avoiding the predator
 
     for(unsigned i=0; i<N; i++)
