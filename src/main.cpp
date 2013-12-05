@@ -15,19 +15,23 @@ using namespace std;
 // Globals here.
 namespace
 {
-  Rules* rules;
+    Rules* rules;
+    Camera camera;
+    float CAMERA_DISTANCE = 100;
+    float NUM_BOIDS = 50;
+    bool birdseye = false;
 
-  void initSystem(int argc, char * argv[])
-  {
-    rules = new Rules;
-    for(int i=0; i < 20; i++)
+    void initSystem(int argc, char * argv[])
     {
-        Vector3f p = Vector3f(rand() % (MAX_X * 2) - MAX_X, rand() % (MAX_Y * 2) - MAX_Y, rand() % (MAX_Z * 2) - MAX_Z);
-        Vector3f v = Vector3f(((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX));
-        rules->boids.push_back(new Boid(p, v.normalized()));
+        rules = new Rules;
+        for(int i=0; i < NUM_BOIDS; i++)
+        {
+            Vector3f p = Vector3f(rand() % (MAX_X * 2) - MAX_X, rand() % (MAX_Y * 2) - MAX_Y, rand() % (MAX_Z * 2) - MAX_Z);
+            Vector3f v = Vector3f(((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX));
+            rules->boids.push_back(new Boid(p, v.normalized()));
+        }
+        rules->N = rules->boids.size();
     }
-    rules->N = rules->boids.size();
-  }
 
   
 
@@ -44,8 +48,17 @@ namespace
     // CALL DRAW STUFF HERE
     for(int i=0; i < rules->N; i++)
     {
-        if (i != 0) {
-            rules->boids.at(i)->draw();
+        if (!birdseye || i != 0) {
+            if (i == 0) 
+            {
+                glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
+                rules->boids.at(i)->draw();
+                glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, particleColor);
+            } 
+            else
+            {
+                rules->boids.at(i)->draw();
+            }
         }
     }
 
@@ -91,11 +104,7 @@ namespace
   }
     //-------------------------------------------------------------------
     
-        
-    // This is the camera
-    Camera camera;
-
-    bool birdseye = false;
+    
 
 void stepSystem()
   {
@@ -119,15 +128,6 @@ void stepSystem()
   void toggleBirdseye()
   {
     birdseye = !birdseye;
-    if (!birdseye)
-    {
-        // Matrix4f eye = Matrix4f::identity();
-        // camera.SetRotation( eye );
-        // camera.SetCenter( Vector3f::ZERO );
-        // camera.SetDistance( 100 );
-        // camera.SetEyeTarget( Vector3f( 0, 0, 100), Vector3f::ZERO);
-        camera.SetEyeTargetUp( Vector3f( 0, 0, 100 ), Vector3f::ZERO );
-    }
   }
 
     // These are state variables for the UI
@@ -154,11 +154,8 @@ void stepSystem()
             break;
         case ' ':
         {
-            // Matrix4f eye = Matrix4f::identity();
-            // camera.SetRotation( eye );
-            // camera.SetCenter( Vector3f::ZERO );
-            // camera.SetDistance( 100 );
-            camera.SetEyeTargetUp( Vector3f( 0, 0, 100), Vector3f::ZERO);
+            camera.SetCenter( Vector3f::ZERO );
+            camera.SetDistance( CAMERA_DISTANCE );
             break;
         }
         case 'b':
@@ -233,7 +230,7 @@ void stepSystem()
         // Set up a perspective view, with square aspect ratio
         glMatrixMode(GL_PROJECTION);
 
-        camera.SetPerspective(50);
+        camera.SetPerspective(100);
         glLoadMatrixf( camera.projectionMatrix() );
     }
 
@@ -345,14 +342,12 @@ int main( int argc, char* argv[] )
 
     // Initial parameters for window position and size
     glutInitWindowPosition( 60, 60 );
-    glutInitWindowSize( 600, 600 );
+    glutInitWindowSize( 1200, 1200 );
     
-    camera.SetDimensions( 600, 600 );
+    camera.SetDimensions( 1200, 1200 );
 
-    // camera.SetDistance( 100 );
-    // camera.SetCenter( Vector3f::ZERO );
-
-    camera.SetEyeTargetUp( Vector3f( 0, 0, 100 ), Vector3f::ZERO );
+    camera.SetCenter( Vector3f::ZERO );
+    camera.SetDistance( CAMERA_DISTANCE );
     
     glutCreateWindow("Boids");
 

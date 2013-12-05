@@ -44,7 +44,6 @@ public:
     void SetCenter(const Vector3f& center);
     void SetRotation(const Matrix4f& rotation);
     void SetDistance(const float distance);
-    void SetEyeTargetUp(const Vector3f& eye, const Vector3f& target, const Vector3f& up = Vector3f(0,1,0));
 
     // Get for relevant vars
     Vector3f GetCenter() const { return mCurrentCenter; }
@@ -71,10 +70,6 @@ private:
     // For zoom
     float    mStartDistance;
     float    mCurrentDistance;
-    Vector3f mStartEye;
-    Vector3f mCurrentEye;
-
-    Vector3f mUp;
 
 
     void ArcBallRotation(int x, int y);
