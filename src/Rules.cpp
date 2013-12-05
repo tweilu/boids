@@ -6,6 +6,8 @@ using namespace std;
 void Rules::init(int num_boids)
 {
     predatorOn = false;
+    scatter = false;
+    secs = 0;
     for(int i=0; i < num_boids; i++)
     {
         Vector3f p = randPosVec3f();
@@ -142,16 +144,6 @@ void Rules::update_boids()
     float wm = 0.5; // weight for match velocity
     float wa = 0.3; // weight for avoiding the predator
 
-    if(scatter && secs < 5)
-    {
-        wc = -10*wc;
-        secs += 1;
-    } else
-    {
-        scatter = false;
-        secs = 0;
-    }
-
     for(unsigned i=0; i<N; i++)
     {
         Boid* b = boids.at(i);
@@ -177,6 +169,18 @@ void Rules::update_boids()
                 newV += wm*match_velocity(b);
             }
         }
+
+        if(scatter && secs < 5*N)
+        {
+            wc = -15*wc;
+            secs += 1;
+        } else
+        {
+            scatter = false;
+            secs = 0;
+        }
+
+
         newV += wc*center_of_mass(b);
 
         b->setVelocity( oldV + newV );
