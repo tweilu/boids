@@ -7,7 +7,7 @@ using namespace std;
 // returns position offset for given boid as a result of rule
 Vector3f Rules::center_of_mass(Boid* b)
 {
-    Vector3f pc = (Vector3f::ZERO - b->getPosition())/(1.1*N);
+    Vector3f pc = (Vector3f::ZERO - b->getPosition())/(10.0*N);
     return pc/10;
 }
 
@@ -26,14 +26,14 @@ Vector3f Rules::keep_distance(Boid* b)
             numNeighbors += 1;
         }
     }
-    return c/(numNeighbors)/10;
+    return c/(numNeighbors)/100;
 }
 
 // Boids try to match velocity with near boids.
 // returns position offset for given boid as a result of rule
 Vector3f Rules::match_velocity(Boid* b)
 {
-    Vector3f pv = (mFlockHeading - b->getVelocity())/(1.1*N);
+    Vector3f pv = (mFlockHeading - b->getVelocity())/(10.0*N);
     return pv/10;
 }
 
@@ -109,6 +109,6 @@ void Rules::update_boids()
                         // + v4
                        );
         limit_velocity(b);
-        b->setPosition(oldP + .5*b->getVelocity());
+        b->setPosition(oldP + .8*b->getVelocity());
     }
 }

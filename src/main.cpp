@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <cstdio>
 #include <iostream>
 #include <vector>
 
@@ -17,6 +18,7 @@ namespace
 {
     Rules* rules;
     Camera camera;
+    Material *ground;
     float CAMERA_DISTANCE = 100;
     float NUM_BOIDS = 50;
     bool birdseye = false;
@@ -32,8 +34,6 @@ namespace
         }
         rules->N = rules->boids.size();
     }
-
-  
 
   // Draw the current particle positions
   void drawSystem()
@@ -88,6 +88,22 @@ namespace
     glVertex3f(-30,-30,-30);
     glVertex3f(30,-30,-30);
     glEnd();
+
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glBindTexture(GL_TEXTURE_2D, texName);
+    glBegin(GL_QUADS);
+    float groundEdge = 1000;
+    float cubeHeight = 200;
+    glTexCoord2f(0.0, 0.0); glVertex3f(-groundEdge, -cubeHeight, -groundEdge);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-groundEdge, -cubeHeight, groundEdge);
+    glTexCoord2f(1.0, 1.0); glVertex3f(groundEdge, -cubeHeight, groundEdge);
+    glTexCoord2f(1.0, 0.0); glVertex3f(groundEdge, -cubeHeight, -groundEdge);
+
+    glEnd();
+    glFlush();
+    glDisable(GL_TEXTURE_2D);
+
     
     // glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
     // glPushMatrix();
@@ -331,6 +347,7 @@ void stepSystem()
 
 }
 
+
 // Main routine.
 // Set up OpenGL, define the callbacks and start the main loop
 int main( int argc, char* argv[] )
@@ -374,9 +391,12 @@ int main( int argc, char* argv[] )
     // Trigger timerFunc every 20 msec
     glutTimerFunc(100, timerFunc, 100);
 
-        
+    ground = new Material()
+
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop();
 
     return 0;    // This line is never reached.
 }
+
+
