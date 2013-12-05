@@ -18,10 +18,21 @@ namespace
 {
     Rules* rules;
     Camera camera;
-    Material *ground;
-    float CAMERA_DISTANCE = 100;
+    float CAMERA_DISTANCE = 60;
     float NUM_BOIDS = 50;
     bool birdseye = false;
+
+    #define groundImageWidth 64
+    #define groundImageHeight 64
+    static GLubyte groundImage[groundImageHeight][groundImageWidth][4];
+    static GLuint groundTexture;
+    #define skyImageWidth 64
+    #define skyImageHeight 64
+    static GLubyte skyImage[skyImageHeight][skyImageWidth][4];
+    static GLuint skyTexture;
+
+    // static GLuint groundTex;
+    // static GLubyte groundImage[imageWidth][imageHeight][4];
 
     void initSystem(int argc, char * argv[])
     {
@@ -34,6 +45,82 @@ namespace
         }
         rules->N = rules->boids.size();
     }
+
+void makeGroundImage(void)
+{
+   int i, j, c;
+    
+   for (i = 0; i < groundImageHeight; i++) {
+      for (j = 0; j < groundImageWidth; j++) {
+         // c = ((((i&0x8)==0)^((j&0x8))==0))*255;
+         groundImage[i][j][0] = (GLubyte) 0;
+         groundImage[i][j][1] = (GLubyte) 153;
+         groundImage[i][j][2] = (GLubyte) 0;
+         groundImage[i][j][3] = (GLubyte) 255;
+      }
+   }
+}
+
+void makeSkyImage(void)
+{
+   int i, j, c;
+    
+   for (i = 0; i < groundImageHeight; i++) {
+      for (j = 0; j < groundImageWidth; j++) {
+         // c = ((((i&0x8)==0)^((j&0x8))==0))*255;
+         skyImage[i][j][0] = (GLubyte) 0;
+         skyImage[i][j][1] = (GLubyte) 0;
+         skyImage[i][j][2] = (GLubyte) 153;
+         skyImage[i][j][3] = (GLubyte) 255;
+      }
+   }
+}
+
+void init(void)
+{    
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   glShadeModel(GL_FLAT);
+   glEnable(GL_DEPTH_TEST);
+
+   makeGroundImage();
+   makeSkyImage();
+
+   // Ground
+
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+   glGenTextures(1, &groundTexture);
+   glBindTexture(GL_TEXTURE_2D, groundTexture);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, 
+                   GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 
+                   GL_NEAREST);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, groundImageWidth, 
+                groundImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+                groundImage);
+
+   // Sky
+
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+   glGenTextures(1, &skyTexture);
+   glBindTexture(GL_TEXTURE_2D, skyTexture);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, 
+                   GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 
+                   GL_NEAREST);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, skyImageWidth, 
+                skyImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+                skyImage);
+}
+
+
 
   // Draw the current particle positions
   void drawSystem()
@@ -89,16 +176,65 @@ namespace
     glVertex3f(30,-30,-30);
     glEnd();
 
+    // glEnable(GL_TEXTURE_2D);
+    // glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    // glBindTexture(GL_TEXTURE_2D, texName);
+    // glBegin(GL_QUADS);
+    // glTexCoord2f(0.0, 0.0); glVertex3f(-2.0, -1.0, 0.0);
+    // glTexCoord2f(0.0, 1.0); glVertex3f(-2.0, 1.0, 0.0);
+    // glTexCoord2f(1.0, 1.0); glVertex3f(0.0, 1.0, 0.0);
+    // glTexCoord2f(1.0, 0.0); glVertex3f(0.0, -1.0, 0.0);
+    // glTexCoord2f(0.0, 0.0); glVertex3f(1.0, -1.0, 0.0);
+    // glTexCoord2f(0.0, 1.0); glVertex3f(1.0, 1.0, 0.0);
+    // glTexCoord2f(1.0, 1.0); glVertex3f(2.41421, 1.0, -1.41421);
+    // glTexCoord2f(1.0, 0.0); glVertex3f(2.41421, -1.0, -1.41421);
+    // glEnd();
+    // glFlush();
+    // glDisable(GL_TEXTURE_2D);
+
+
+    float groundEdge = 600;
+    float cubeHeight = 200;
+
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    glBindTexture(GL_TEXTURE_2D, texName);
+    glBindTexture(GL_TEXTURE_2D, groundTexture);
     glBegin(GL_QUADS);
-    float groundEdge = 1000;
-    float cubeHeight = 200;
     glTexCoord2f(0.0, 0.0); glVertex3f(-groundEdge, -cubeHeight, -groundEdge);
     glTexCoord2f(0.0, 1.0); glVertex3f(-groundEdge, -cubeHeight, groundEdge);
     glTexCoord2f(1.0, 1.0); glVertex3f(groundEdge, -cubeHeight, groundEdge);
     glTexCoord2f(1.0, 0.0); glVertex3f(groundEdge, -cubeHeight, -groundEdge);
+
+    glEnd();
+    glFlush();
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glBindTexture(GL_TEXTURE_2D, skyTexture);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-groundEdge, -cubeHeight, -groundEdge);
+    glTexCoord2f(0.0, 1.0); glVertex3f(groundEdge, -cubeHeight, -groundEdge);
+    glTexCoord2f(1.0, 1.0); glVertex3f(groundEdge, groundEdge, -groundEdge);
+    glTexCoord2f(1.0, 0.0); glVertex3f(-groundEdge, groundEdge, -groundEdge);
+
+    glTexCoord2f(0.0, 0.0); glVertex3f(groundEdge, -cubeHeight, -groundEdge);
+    glTexCoord2f(0.0, 1.0); glVertex3f(groundEdge, -cubeHeight, groundEdge);
+    glTexCoord2f(1.0, 1.0); glVertex3f(groundEdge, groundEdge, groundEdge);
+    glTexCoord2f(1.0, 0.0); glVertex3f(groundEdge, groundEdge, -groundEdge);
+
+    glTexCoord2f(0.0, 0.0); glVertex3f(-groundEdge, -cubeHeight, groundEdge);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-groundEdge, -cubeHeight, -groundEdge);
+    glTexCoord2f(1.0, 1.0); glVertex3f(-groundEdge, groundEdge, -groundEdge);
+    glTexCoord2f(1.0, 0.0); glVertex3f(-groundEdge, groundEdge, groundEdge);
+
+    glTexCoord2f(0.0, 0.0); glVertex3f(groundEdge, -cubeHeight, groundEdge);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-groundEdge, -cubeHeight, groundEdge);
+    glTexCoord2f(1.0, 1.0); glVertex3f(-groundEdge, groundEdge, groundEdge);
+    glTexCoord2f(1.0, 0.0); glVertex3f(groundEdge, groundEdge, groundEdge);
+
+    glTexCoord2f(0.0, 0.0); glVertex3f(groundEdge, groundEdge, -groundEdge);
+    glTexCoord2f(0.0, 1.0); glVertex3f(groundEdge, groundEdge, groundEdge);
+    glTexCoord2f(1.0, 1.0); glVertex3f(-groundEdge, groundEdge, groundEdge);
+    glTexCoord2f(1.0, 0.0); glVertex3f(-groundEdge, groundEdge, -groundEdge);
 
     glEnd();
     glFlush();
@@ -361,7 +497,7 @@ int main( int argc, char* argv[] )
     glutInitWindowPosition( 60, 60 );
     glutInitWindowSize( 1200, 1200 );
     
-    camera.SetDimensions( 1200, 1200 );
+    camera.SetDimensions( 2000, 2000 );
 
     camera.SetCenter( Vector3f::ZERO );
     camera.SetDistance( CAMERA_DISTANCE );
@@ -391,7 +527,7 @@ int main( int argc, char* argv[] )
     // Trigger timerFunc every 20 msec
     glutTimerFunc(100, timerFunc, 100);
 
-    ground = new Material()
+    init();
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop();
