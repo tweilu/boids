@@ -21,13 +21,21 @@ namespace
     float NUM_BOIDS = 50;
     bool birdseye = false;
 
+    Vector3f randPosVec3f() {
+        return Vector3f(rand() % (MAX_X * 2) - MAX_X, rand() % (MAX_Y * 2) - MAX_Y, rand() % (MAX_Z * 2) - MAX_Z);
+    }
+
+    Vector3f randVelVec3f() {
+        return Vector3f(((float)rand() / RAND_MAX) - 0.5, ((float)rand() / RAND_MAX) - 0.5, ((float)rand() / RAND_MAX) - 0.5);
+    }
+
     void initSystem(int argc, char * argv[])
     {
         rules = new Rules;
         for(int i=0; i < NUM_BOIDS; i++)
         {
-            Vector3f p = Vector3f(rand() % (MAX_X * 2) - MAX_X, rand() % (MAX_Y * 2) - MAX_Y, rand() % (MAX_Z * 2) - MAX_Z);
-            Vector3f v = Vector3f(((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX));
+            Vector3f p = randPosVec3f();
+            Vector3f v = randVelVec3f();
             rules->boids.push_back(new Boid(p, v.normalized()));
         }
         rules->N = rules->boids.size();
@@ -372,7 +380,7 @@ int main( int argc, char* argv[] )
     glutDisplayFunc( drawScene );
 
     // Trigger timerFunc every 20 msec
-    glutTimerFunc(100, timerFunc, 100);
+    glutTimerFunc(20, timerFunc, 20);
 
         
     // Start the main loop.  glutMainLoop never returns.

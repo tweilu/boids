@@ -3,70 +3,69 @@
 
 using namespace std;
 
+
 // Boids try to fly towards the centre of mass of neighbouring boids.
 // returns position offset for given boid as a result of rule
 Vector3f Rules::center_of_mass(Boid* b)
 {
-    Vector3f pc = (Vector3f::ZERO - b->getPosition())/(1.1*N);
-    return pc/10;
+    Vector3f pc = Vector3f::ZERO;
+    float count = 0.0;
+    for(int i=0; i<N; i++)
+    {
+        Boid* bi = boids[i];
+        Vector3f disp = b->getPosition() - bi->getPosition();
+        if(disp.abs() < 10 && disp.abs() > 0.0001)
+        {
+            count += 1.0;
+            pc += bi->getPosition();
+        }
+    } 
+    if (count > 0)
+    {
+        pc = pc/count;
+        pc -= b->getPosition();
+    }
+    return pc;
 }
 
 // Boids try to keep a small distance away from other objects (including other boids).
 // returns position offset for given boid as a result of rule
 Vector3f Rules::keep_distance(Boid* b)
 {
-    Vector3f c = Vector3f::ZERO;
-    int numNeighbors;
-    for(unsigned i=0; i<N; i++)
-    {
-        Vector3f disp = b->getPosition() - boids.at(i)->getPosition();
-        if (disp.abs() < 5)
-        {
-            c = c + disp;
-            numNeighbors += 1;
+    Vector3f a = Vector3f::ZERO;
+    float count = 0.0;
+    for(int i=0; i < N; i++) {
+        Vector3f disp = b->getPosition() - boids[i]->getPosition();
+        if (disp.abs() < 10 && disp.abs() > 0.0001) {
+            count += 1.0;
+            a += disp;
         }
     }
-    return c/(numNeighbors)/10;
+    if (count > 0) {
+        a = a/count;
+    }
+    return a;
 }
 
 // Boids try to match velocity with near boids.
 // returns position offset for given boid as a result of rule
 Vector3f Rules::match_velocity(Boid* b)
 {
-    Vector3f pv = (mFlockHeading - b->getVelocity())/(1.1*N);
-    return pv/10;
-}
-
-Vector3f Rules::bound_position(Boid* b)
-{
-    float x, y, z;
-    Vector3f pos = b->getPosition();
-    float val = 1;
-
-    if(pos.x() < MIN_X)
-    {
-        x = val;
-    } else if(pos.x() > MAX_X)
-    {
-        x = -val;
+    Vector3f m = Vector3f::ZERO;
+    float count = 0.0;
+    for(int i=0; i < N; i++) {
+        Boid* bi = boids[i];
+        Vector3f disp = b->getPosition() - bi->getPosition();
+        if (disp.abs() < 10 && disp.abs() > 0.0001) {
+            count += 1.0;
+            m += bi->getVelocity();
+        }
     }
-
-    if(pos.y() < MIN_Y)
-    {
-        y = val * (MIN_Y - pos.y());
-    } else if(pos.y() > MAX_Y)
-    {
-        y = -val;
+    if (count > 0) {
+        m = m/(count);
+        m -= b->getVelocity();
     }
-
-    if(pos.z() < MIN_Z)
-    {
-        z = val;
-    } else if(pos.z() > MAX_Z)
-    {
-        z = -val;
-    }
-    return Vector3f(x,y,z);
+    return m;
 }
 
 void Rules::limit_velocity(Boid* b)
@@ -83,32 +82,32 @@ void Rules::limit_velocity(Boid* b)
 // Applies all rules to all boids
 void Rules::update_boids()
 {
-    mCenterOfMass = Vector3f::ZERO;
-    mFlockHeading = Vector3f::ZERO;
-    for (unsigned i=0; i<N; i++) {
+    //mCenterOfMass = Vector3f::ZERO;
+    //mFlockHeading = Vector3f::ZERO;
+    /*for(unsigned i=0; i<N; i++)
+    {
+        Boid* b = boids.at(i);
+        b->update(boids);
+    }*/
+    /*for (unsigned i=0; i<N; i++) {
         mCenterOfMass += boids[i]->getPosition();
         mFlockHeading += boids[i]->getVelocity();
-    }
+    }*/
 
-    Vector3f v1, v2, v3, v4;
     for(unsigned i=0; i<N; i++)
     {
         Boid* b = boids.at(i);
-        v1 = center_of_mass(b);
-        v2 = keep_distance(b);
-        v3 = match_velocity(b);
-        // v4 = bound_position(b);
 
         Vector3f oldV = b->getVelocity();
         Vector3f oldP = b->getPosition();
         b->setVelocity( 
                         oldV
-                        + v1
-                        + v2 
-                        + v3 
-                        // + v4
+                        + 0.5*center_of_mass(b)
+                        + 0.5*keep_distance(b)
+                        + 0.5*match_velocity(b)
                        );
         limit_velocity(b);
-        b->setPosition(oldP + .5*b->getVelocity());
+        b->bound();
+        b->setPosition(oldP + b->getVelocity());
     }
 }

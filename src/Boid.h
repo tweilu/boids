@@ -4,13 +4,13 @@
 #include "vecmath.h"
 #include <vector>
 
-
 class Boid
 {
 public:
 	Boid(Vector3f position, Vector3f velocity);
 	
 	void draw();
+	void bound();
 
 	Vector3f getPosition();
 	Vector3f getVelocity();

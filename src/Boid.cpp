@@ -1,6 +1,13 @@
 #include "Boid.h"
 #include "extra.h"
 
+#define MAX_X 30
+#define MIN_X -30
+#define MAX_Y 30
+#define MIN_Y -30
+#define MAX_Z 30
+#define MIN_Z -30
+
 Boid::Boid(Vector3f position, Vector3f velocity)
 {
     mPosition = position;
@@ -44,4 +51,31 @@ void Boid::draw()
     }
     glutWireCone(0.25, 0.5, 50, 50);
     glPopMatrix();
+}
+
+void Boid::bound()
+{
+    float x = 0;
+    float y = 0;
+    float z = 0;
+
+    if (mPosition.x() > MAX_X) {
+        x -= 0.01;
+    }
+    if (mPosition.x() < MIN_X) {
+        x += 0.01;
+    }
+    if (mPosition.y() > MAX_Y) {
+        y -= 0.01;
+    }
+    if (mPosition.y() < MIN_Y) {
+        y += 0.01;
+    }
+    if (mPosition.z() > MAX_Z) {
+        z -= 0.01;
+    }
+    if (mPosition.z() < MIN_Z) {
+        z += 0.01;
+    }
+    mVelocity += Vector3f(x,y,z);
 }
