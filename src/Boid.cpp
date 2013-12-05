@@ -8,10 +8,11 @@
 #define MAX_Z 30
 #define MIN_Z -30
 
-Boid::Boid(Vector3f position, Vector3f velocity)
+Boid::Boid(Vector3f position, Vector3f velocity, bool predator)
 {
     mPosition = position;
     mVelocity = velocity;
+    mPredator = predator;
     oldX = 0.0;
     oldY = 0.0;
     oldZ = 1.0;
@@ -24,6 +25,10 @@ Vector3f Boid::getPosition()
 Vector3f Boid::getVelocity()
 {
     return mVelocity;
+}
+bool Boid::isPredator()
+{
+    return mPredator;
 }
 
 void Boid::setPosition(Vector3f position)

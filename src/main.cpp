@@ -19,7 +19,7 @@ namespace
     Rules* rules;
     Camera camera;
     float CAMERA_DISTANCE = 60;
-    float NUM_BOIDS = 50;
+    int NUM_BOIDS = 50;
     bool birdseye = false;
 
     Vector3f randPosVec3f() {
@@ -42,13 +42,7 @@ namespace
     void initSystem(int argc, char * argv[])
     {
         rules = new Rules;
-        for(int i=0; i < NUM_BOIDS; i++)
-        {
-            Vector3f p = randPosVec3f();
-            Vector3f v = randVelVec3f();
-            rules->boids.push_back(new Boid(p, v.normalized()));
-        }
-        rules->N = rules->boids.size();
+        rules->init(NUM_BOIDS);
     }
 
 void makeGroundImage(void)
@@ -289,6 +283,16 @@ void stepSystem()
   void toggleScatter()
   {
     rules->scatter = true;
+    cout << "Scatter!" << endl;
+  }
+  void togglePredator()
+  {
+    rules->predatorOn = !rules->predatorOn;
+    if(rules->predatorOn) {
+        cout << "Predator On" << endl;
+    } else {
+        cout << "Predator Off" << endl;
+    }
   }
 
     // These are state variables for the UI
@@ -327,6 +331,11 @@ void stepSystem()
         case 's':
         {
             toggleScatter();
+            break;
+        }
+        case 'p':
+        {
+            togglePredator();
             break;
         }
         default:

@@ -17,6 +17,11 @@ struct Rules
 	std::vector<Boid*> boids;
 	int N;
 
+	void init(int num_boids);
+
+	Vector3f randPosVec3f();
+	Vector3f randVelVec3f();
+
 	// Boids try to fly towards the centre of mass of neighbouring boids.
 	// returns position offset for given boid as a result of rule
 	Vector3f center_of_mass(Boid* b);
@@ -29,7 +34,9 @@ struct Rules
 	// returns position offset for given boid as a result of rule
 	Vector3f match_velocity(Boid* b);
 
-	Vector3f bound_position(Boid* b);
+	Vector3f avoid_predator(Boid* b);
+
+	bool check_predator(Boid* b);
 
 	void limit_velocity(Boid* b);
 
@@ -37,9 +44,12 @@ struct Rules
 
 	bool scatter;
 
+	bool predatorOn;
+
 private:
 	Vector3f mCenterOfMass;
 	Vector3f mFlockHeading;
+	Boid* predator;
 	int secs;
 };
 
