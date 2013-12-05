@@ -59,23 +59,25 @@ void Boid::bound()
     float y = 0;
     float z = 0;
 
+    float val = 0.03;
+
     if (mPosition.x() > MAX_X) {
-        x -= 0.01;
+        x -= val;
     }
     if (mPosition.x() < MIN_X) {
-        x += 0.01;
+        x += val;
     }
     if (mPosition.y() > MAX_Y) {
-        y -= 0.01;
+        y -= val;
     }
     if (mPosition.y() < MIN_Y) {
-        y += 0.01;
+        y += val;
     }
     if (mPosition.z() > MAX_Z) {
-        z -= 0.01;
+        z -= val;
     }
     if (mPosition.z() < MIN_Z) {
-        z += 0.01;
+        z += val;
     }
     mVelocity += Vector3f(x,y,z);
 }

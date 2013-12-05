@@ -13,8 +13,8 @@ Vector3f Rules::center_of_mass(Boid* b)
     for(int i=0; i<N; i++)
     {
         Boid* bi = boids[i];
-        Vector3f disp = b->getPosition() - bi->getPosition();
-        if(disp.abs() < 10 && disp.abs() > 0.0001)
+        float disp = (b->getPosition() - bi->getPosition()).abs();
+        if(disp < 15 && disp > 0.0001)
         {
             count += 1.0;
             pc += bi->getPosition();
@@ -25,7 +25,7 @@ Vector3f Rules::center_of_mass(Boid* b)
         pc = pc/count;
         pc -= b->getPosition();
     }
-    return pc;
+    return pc/10.0;
 }
 
 // Boids try to keep a small distance away from other objects (including other boids).
@@ -36,7 +36,7 @@ Vector3f Rules::keep_distance(Boid* b)
     float count = 0.0;
     for(int i=0; i < N; i++) {
         Vector3f disp = b->getPosition() - boids[i]->getPosition();
-        if (disp.abs() < 10 && disp.abs() > 0.0001) {
+        if (disp.abs() < 8 && disp.abs() > 0.0001) {
             count += 1.0;
             a += disp;
         }
@@ -44,7 +44,7 @@ Vector3f Rules::keep_distance(Boid* b)
     if (count > 0) {
         a = a/count;
     }
-    return a;
+    return a/10.0;
 }
 
 // Boids try to match velocity with near boids.
@@ -55,8 +55,8 @@ Vector3f Rules::match_velocity(Boid* b)
     float count = 0.0;
     for(int i=0; i < N; i++) {
         Boid* bi = boids[i];
-        Vector3f disp = b->getPosition() - bi->getPosition();
-        if (disp.abs() < 10 && disp.abs() > 0.0001) {
+        float disp = (b->getPosition() - bi->getPosition()).abs();
+        if (disp < 10 && disp > 0.0001) {
             count += 1.0;
             m += bi->getVelocity();
         }
@@ -65,12 +65,12 @@ Vector3f Rules::match_velocity(Boid* b)
         m = m/(count);
         m -= b->getVelocity();
     }
-    return m;
+    return m/10.0;
 }
 
 void Rules::limit_velocity(Boid* b)
 {
-    int vlim = 3;
+    int vlim = 1;
     Vector3f vel = b->getVelocity();
     float speed = vel.abs();
     if(speed > vlim)
@@ -84,15 +84,24 @@ void Rules::update_boids()
 {
     //mCenterOfMass = Vector3f::ZERO;
     //mFlockHeading = Vector3f::ZERO;
-    /*for(unsigned i=0; i<N; i++)
-    {
-        Boid* b = boids.at(i);
-        b->update(boids);
-    }*/
     /*for (unsigned i=0; i<N; i++) {
         mCenterOfMass += boids[i]->getPosition();
         mFlockHeading += boids[i]->getVelocity();
     }*/
+
+    float wc = 0.4;
+    float wk = 0.7;
+    float wm = 0.5;
+
+    if(scatter && secs < 5)
+    {
+        wc = -10*wc;
+        secs += 1;
+    } else
+    {
+        scatter = false;
+        secs = 0;
+    }
 
     for(unsigned i=0; i<N; i++)
     {
@@ -102,9 +111,9 @@ void Rules::update_boids()
         Vector3f oldP = b->getPosition();
         b->setVelocity( 
                         oldV
-                        + 0.5*center_of_mass(b)
-                        + 0.5*keep_distance(b)
-                        + 0.5*match_velocity(b)
+                        + wc*center_of_mass(b)
+                        + wk*keep_distance(b)
+                        + wm*match_velocity(b)
                        );
         limit_velocity(b);
         b->bound();

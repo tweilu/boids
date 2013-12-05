@@ -35,9 +35,12 @@ struct Rules
 
 	void update_boids();
 
+	bool scatter;
+
 private:
 	Vector3f mCenterOfMass;
 	Vector3f mFlockHeading;
+	int secs;
 };
 
 #endif

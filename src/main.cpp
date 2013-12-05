@@ -137,6 +137,10 @@ void stepSystem()
   {
     birdseye = !birdseye;
   }
+  void toggleScatter()
+  {
+    rules->scatter = true;
+  }
 
     // These are state variables for the UI
     bool g_mousePressed = false;
@@ -169,6 +173,11 @@ void stepSystem()
         case 'b':
         {
             toggleBirdseye();
+            break;
+        }
+        case 's':
+        {
+            toggleScatter();
             break;
         }
         default:
