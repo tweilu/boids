@@ -3,6 +3,7 @@
 
 #include "vecmath.h"
 #include <vector>
+#include <cstdlib>
 #include "Boid.h"
 
 #define MAX_X 30

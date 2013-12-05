@@ -65,18 +65,39 @@ Vector3f Rules::center_of_mass(Boid* b)
 
 // Boids try to keep a small distance away from other objects (including other boids).
 // returns position offset for given boid as a result of rule
+// Vector3f Rules::keep_distance(Boid* b)
+// {
+//     Vector3f a = Vector3f::ZERO;
+//     float count = 0.0;
+//     for(int i=0; i < N; i++) {
+//         Boid* bi = boids[i];
+//         if (!check_predator(bi))
+//         {
+//             Vector3f disp = b->getPosition() - bi->getPosition();
+//             if (disp.abs() < 8 && disp.abs() > 0.0001) {
+//                 count += 1.0;
+//                 a += disp;
+//             }
+//         }
+//     }
+//     if (count > 0) {
+//         a = a/count;
+//     }
+//     return a/10.0;
+// }
+
 Vector3f Rules::keep_distance(Boid* b)
 {
     Vector3f a = Vector3f::ZERO;
     float count = 0.0;
     for(int i=0; i < N; i++) {
-        Boid* bi = boids[i];
-        if (!check_predator(bi))
-        {
-            Vector3f disp = b->getPosition() - bi->getPosition();
-            if (disp.abs() < 8 && disp.abs() > 0.0001) {
+        Boid *bi = boids[i];
+        if (!check_predator(bi)) {
+            Vector3f disp = b->getPosition() - boids[i]->getPosition();
+            if (disp.abs() < 5 && disp.abs() > 0.0001) 
+            {
                 count += 1.0;
-                a += disp;
+                a += disp * (5 - disp.abs())/5;
             }
         }
     }
@@ -115,7 +136,7 @@ Vector3f Rules::avoid_predator(Boid* b)
     Vector3f disp = b->getPosition() - predator->getPosition();
     Vector3f p = Vector3f::ZERO;
     if (disp.abs() < 20) {
-        p = disp;
+        p = disp*(20-disp.abs())/20;
     }
     return p;
 }
@@ -139,10 +160,10 @@ void Rules::limit_velocity(Boid* b)
 // Applies all rules to all boids
 void Rules::update_boids()
 {
-    float wc = 0.4; // weight for center of mass
-    float wk = 0.7; // weight for keep distance
-    float wm = 0.5; // weight for match velocity
-    float wa = 0.3; // weight for avoiding the predator
+    float wc = 0.01; // weight for center of mass
+    float wk = 0.5; // weight for keep distance
+    float wm = 0.25; // weight for match velocity
+    float wa = 0.5; // weight for avoiding the predator
 
     for(unsigned i=0; i<N; i++)
     {
@@ -159,11 +180,11 @@ void Rules::update_boids()
             {
                 newV += wa*avoid_predator(b);
             }
-            wc = 0.4;
+            // wc = 0.4;
         }  else { // if it is the predator
             if(predatorOn) // and it's ON
             {
-               wc = 2.0;
+               wc /= 2.0;
             } else {
                 newV += wk*keep_distance(b);
                 newV += wm*match_velocity(b);
