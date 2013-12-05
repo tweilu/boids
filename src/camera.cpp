@@ -43,7 +43,16 @@ void Camera::SetRotation(const Matrix4f& rotation)
 
 void Camera::SetDistance(const float distance)
 {
-    mStartDistance = mCurrentDistance = distance;
+    mStartEye = mCurrentEye = Vector3f(0, 0, distance);
+    mUp = Vector3f::UP;
+}
+
+void Camera::SetEyeTargetUp(const Vector3f& eye, const Vector3f& target, const Vector3f& up)
+{
+    mStartCenter = mCurrentCenter = target;
+    mStartEye = mCurrentEye = eye;
+    mUp = up;
+    // mStartEye = mCurrentEye = Vector3f( 0, 0, 30);
 }
 
 void Camera::MouseClick(Button button, int x, int y)
@@ -61,7 +70,7 @@ void Camera::MouseClick(Button button, int x, int y)
         mCurrentCenter = mStartCenter;
         break;
     case RIGHT:
-        mCurrentDistance = mStartDistance;
+        mStartEye = mCurrentEye;
         break;        
     default:
         break;
@@ -91,7 +100,7 @@ void Camera::MouseRelease(int x, int y)
 {
     mStartRot = mCurrentRot;
     mStartCenter = mCurrentCenter;
-    mStartDistance = mCurrentDistance;
+    mStartEye = mCurrentEye;
     
     mButtonState = NONE;
 }
@@ -198,7 +207,7 @@ void Camera::PlaneTranslation(int x, int y)
     Vector2f move(cr-sr, cu-su);
 
     // this maps move
-    move *= -mCurrentDistance/d;
+    move *= -mCurrentEye.z()/d;
 
     mCurrentCenter = mStartCenter +
         + move[0] * Vector3f(mCurrentRot(0,0),mCurrentRot(0,1),mCurrentRot(0,2))
@@ -225,9 +234,9 @@ Matrix4f Camera::viewMatrix() const
 	// back up distance
 	Matrix4f lookAt = Matrix4f::lookAt
 	(
-		Vector3f( 0, 0, mCurrentDistance ),
-		Vector3f::ZERO,
-		Vector3f::UP
+		mCurrentEye,
+		mCurrentCenter,
+		mUp
 	);
     
 	return lookAt * mCurrentRot * Matrix4f::translation( -mCurrentCenter );
@@ -253,5 +262,5 @@ void Camera::DistanceZoom(int x, int y)
     float delta = float(cy-sy)/mViewport[3];
 
     // exponential zoom factor
-    mCurrentDistance = mStartDistance * exp(delta);  
+    mCurrentEye = mStartCenter + mStartEye.normalized() * exp(delta);  
 }

@@ -44,6 +44,7 @@ public:
     void SetCenter(const Vector3f& center);
     void SetRotation(const Matrix4f& rotation);
     void SetDistance(const float distance);
+    void SetEyeTargetUp(const Vector3f& eye, const Vector3f& target, const Vector3f& up = Vector3f(0,1,0));
 
     // Get for relevant vars
     Vector3f GetCenter() const { return mCurrentCenter; }
@@ -62,14 +63,19 @@ private:
     Matrix4f mCurrentRot;
 
     // For translation
-    float   mPerspective[2];
-    int     mViewport[4];
+    float    mPerspective[2];
+    int      mViewport[4];
     Vector3f mStartCenter;
     Vector3f mCurrentCenter;
 
     // For zoom
-    float   mStartDistance;
-    float   mCurrentDistance;
+    float    mStartDistance;
+    float    mCurrentDistance;
+    Vector3f mStartEye;
+    Vector3f mCurrentEye;
+
+    Vector3f mUp;
+
 
     void ArcBallRotation(int x, int y);
     void PlaneTranslation(int x, int y);

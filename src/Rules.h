@@ -34,6 +34,10 @@ struct Rules
 	void limit_velocity(Boid* b);
 
 	void update_boids();
+
+private:
+	Vector3f mCenterOfMass;
+	Vector3f mFlockHeading;
 };
 
 #endif

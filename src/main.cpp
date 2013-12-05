@@ -20,7 +20,7 @@ namespace
   void initSystem(int argc, char * argv[])
   {
     rules = new Rules;
-    for(int i=0; i < 10; i++)
+    for(int i=0; i < 20; i++)
     {
         Vector3f p = Vector3f(rand() % (MAX_X * 2) - MAX_X, rand() % (MAX_Y * 2) - MAX_Y, rand() % (MAX_Z * 2) - MAX_Z);
         Vector3f v = Vector3f(((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX), ((float)rand() / RAND_MAX / RAND_MAX));
@@ -41,23 +41,52 @@ namespace
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, particleColor);
     
-    glutSolidSphere(0.1f,10.0f,10.0f);
-
     // CALL DRAW STUFF HERE
     for(int i=0; i < rules->N; i++)
     {
-        if(i!=0)
-        {
+        if (i != 0) {
             rules->boids.at(i)->draw();
         }
     }
+
+    glBegin(GL_LINES);
+    glVertex3f(30,30,30);
+    glVertex3f(30,30,-30);
+    glVertex3f(30,-30,30);
+    glVertex3f(30,-30,-30);
+    glVertex3f(-30,30,30);
+    glVertex3f(-30,30,-30);
+    glVertex3f(-30,-30,30);
+    glVertex3f(-30,-30,-30);
+    glVertex3f(30,30,30);
+    glVertex3f(30,-30,30);
+    glVertex3f(30,30,30);
+    glVertex3f(-30,30,30);
+    glVertex3f(30,30,-30);
+    glVertex3f(-30,30,-30);
+    glVertex3f(30,30,-30);
+    glVertex3f(30,-30,-30);
+    glVertex3f(30,-30,30);
+    glVertex3f(-30,-30,30);
+    glVertex3f(-30,-30,-30);
+    glVertex3f(-30,30,-30);
+    glVertex3f(-30,30,30);
+    glVertex3f(-30,-30,30);
+    glVertex3f(-30,-30,-30);
+    glVertex3f(30,-30,-30);
+    glEnd();
     
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
-    glPushMatrix();
-    glTranslatef(0.0f,-5.0f,0.0f);
-    glScaled(50.0f,0.01f,50.0f);
-    glutSolidCube(1);
-    glPopMatrix();
+    // glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
+    // glPushMatrix();
+    // glTranslatef(0.0f,-30.0f,0.0f);
+    // glScaled(60.0f,0.01f,60.0f);
+    // glutSolidCube(1);
+    // glPopMatrix();
+    // glPushMatrix();
+    // glTranslatef(0.0f,30.0f,0.0f);
+    // glScaled(60.0f,0.01f,60.0f);
+    // glutSolidCube(1);
+    // glPopMatrix();
     
   }
     //-------------------------------------------------------------------
@@ -71,15 +100,6 @@ namespace
 void stepSystem()
   {
     rules->update_boids();
-    if (birdseye)
-    {
-        Boid* b = rules->boids.at(0); // attach camera to the first boid
-        camera.SetCenter(b->getPosition());
-        Vector3f dir = b->getVelocity().normalized();
-        Matrix4f rotate;
-        rotate[0] = dir[0]; rotate[5] = dir[1]; rotate[10] = dir[2]; rotate[11] = 1;
-        camera.SetRotation(rotate);
-    }
     
     /*cout << "Start" << endl;
     cout << "Start Position" << endl;
@@ -101,9 +121,12 @@ void stepSystem()
     birdseye = !birdseye;
     if (!birdseye)
     {
-        Matrix4f eye = Matrix4f::identity();
-        camera.SetRotation( eye );
-        camera.SetCenter( Vector3f::ZERO );
+        // Matrix4f eye = Matrix4f::identity();
+        // camera.SetRotation( eye );
+        // camera.SetCenter( Vector3f::ZERO );
+        // camera.SetDistance( 100 );
+        // camera.SetEyeTarget( Vector3f( 0, 0, 100), Vector3f::ZERO);
+        camera.SetEyeTargetUp( Vector3f( 0, 0, 100 ), Vector3f::ZERO );
     }
   }
 
@@ -131,9 +154,11 @@ void stepSystem()
             break;
         case ' ':
         {
-            Matrix4f eye = Matrix4f::identity();
-            camera.SetRotation( eye );
-            camera.SetCenter( Vector3f::ZERO );
+            // Matrix4f eye = Matrix4f::identity();
+            // camera.SetRotation( eye );
+            // camera.SetCenter( Vector3f::ZERO );
+            // camera.SetDistance( 100 );
+            camera.SetEyeTargetUp( Vector3f( 0, 0, 100), Vector3f::ZERO);
             break;
         }
         case 'b':
@@ -247,7 +272,15 @@ void stepSystem()
         glLightfv(GL_LIGHT0, GL_DIFFUSE, Lt0diff);
         glLightfv(GL_LIGHT0, GL_POSITION, Lt0pos);
 
-        glLoadMatrixf( camera.viewMatrix() );
+        if (birdseye) 
+        {
+            Vector3f pos = rules->boids[0]->getPosition();
+            Vector3f vel = rules->boids[0]->getVelocity();
+            gluLookAt(pos[0], pos[1], pos[2], pos[0]+vel[0], pos[1]+vel[1], pos[2]+vel[2], 0, 1, 0);
+        }
+        else {
+            glLoadMatrixf( camera.viewMatrix() );
+        }
 
         // THIS IS WHERE THE DRAW CODE GOES.
 
@@ -268,7 +301,7 @@ void stepSystem()
             glDisable(GL_LIGHTING);
             glLineWidth(3);
             glPushMatrix();
-            glScaled(5.0,5.0,5.0);
+            // glScaled(5.0,5.0,5.0);
             glBegin(GL_LINES);
             glColor4f(1,0.5,0.5,1); glVertex3f(0,0,0); glVertex3f(1,0,0);
             glColor4f(0.5,1,0.5,1); glVertex3f(0,0,0); glVertex3f(0,1,0);
@@ -316,8 +349,10 @@ int main( int argc, char* argv[] )
     
     camera.SetDimensions( 600, 600 );
 
-    camera.SetDistance( 100 );
-    camera.SetCenter( Vector3f::ZERO );
+    // camera.SetDistance( 100 );
+    // camera.SetCenter( Vector3f::ZERO );
+
+    camera.SetEyeTargetUp( Vector3f( 0, 0, 100 ), Vector3f::ZERO );
     
     glutCreateWindow("Boids");
 
